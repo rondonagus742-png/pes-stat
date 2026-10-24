@@ -192,15 +192,23 @@ export function LeagueDashboard() {
     }).then((data) => {
       const state = data.state
       if (state && typeof state === 'object') {
-        if (typeof state.activeTournament === 'string' && tournamentData[state.activeTournament]) setActiveTournament(state.activeTournament)
-        if (Array.isArray(state.players)) setPlayers(state.players)
-        if (Array.isArray(state.matches)) setMatches(state.matches)
-        if (state.playerStats && typeof state.playerStats === 'object') setPlayerStats(state.playerStats)
-        if (state.teamGroups && typeof state.teamGroups === 'object') setTeamGroups(state.teamGroups)
-        if (state.tournamentStates && typeof state.tournamentStates === 'object') setTournamentStates(state.tournamentStates)
-        if (state.copaBracket && typeof state.copaBracket === 'object') setCopaBracket(state.copaBracket)
-        if (state.copaVisualBracket && typeof state.copaVisualBracket === 'object') setCopaVisualBracket(state.copaVisualBracket)
-        if (typeof state.copaChampion === 'string') setCopaChampion(state.copaChampion)
+        const loadedTournament = typeof state.activeTournament === 'string' && tournamentData[state.activeTournament] ? state.activeTournament : 'Champions League'
+        const loadedStates = state.tournamentStates && typeof state.tournamentStates === 'object' ? state.tournamentStates : {}
+        const candidateState = loadedStates[loadedTournament]
+        const loadedData = tournamentData[loadedTournament]
+        const defaultIds = new Set(loadedData.players.map((player) => player.id))
+        const hasCompatibleTeams = Array.isArray(candidateState?.players) && candidateState.players.some((player: Player) => defaultIds.has(player.id))
+        const loadedTournamentState = hasCompatibleTeams ? candidateState : undefined
+        const cleanedStates = hasCompatibleTeams ? loadedStates : { ...loadedStates, [loadedTournament]: undefined }
+        setActiveTournament(loadedTournament)
+        setTournamentStates(cleanedStates)
+        setPlayers(Array.isArray(loadedTournamentState?.players) ? loadedTournamentState.players : loadedData.players)
+        setMatches(Array.isArray(loadedTournamentState?.matches) ? loadedTournamentState.matches : loadedData.matches)
+        setPlayerStats(loadedTournamentState?.playerStats && typeof loadedTournamentState.playerStats === 'object' ? loadedTournamentState.playerStats : {})
+        setTeamGroups(loadedTournamentState?.teamGroups && typeof loadedTournamentState.teamGroups === 'object' ? loadedTournamentState.teamGroups : {})
+        if (loadedTournamentState?.copaBracket && typeof loadedTournamentState.copaBracket === 'object') setCopaBracket(loadedTournamentState.copaBracket)
+        if (loadedTournamentState?.copaVisualBracket && typeof loadedTournamentState.copaVisualBracket === 'object') setCopaVisualBracket(loadedTournamentState.copaVisualBracket)
+        if (typeof loadedTournamentState?.copaChampion === 'string') setCopaChampion(loadedTournamentState.copaChampion)
       }
       setPersistenceLoaded(true)
     }).catch(() => setPersistenceLoaded(true))
@@ -327,7 +335,7 @@ export function LeagueDashboard() {
     const nextGroups = savedState?.teamGroups ?? (['Copa América', 'Eurocopa'].includes(tournament) ? Object.fromEntries(nextPlayers.map((player, index) => [player.id, index < Math.ceil(nextPlayers.length / 2) ? 'A' : 'B'])) as Record<string, 'A' | 'B'> : {})
     setPlayerStats(savedState?.playerStats ?? {})
     setTeamGroups(nextGroups)
-    window.localStorage.setItem('pes6-league', JSON.stringify({ activeTournament: tournament, players: nextPlayers, matches: nextMatches, playerStats: {}, teamGroups: nextGroups }))
+    window.localStorage.setItem('pes6-league', JSON.stringify({ activeTournament: tournament, players: nextPlayers, matches: nextMatches, playerStats: savedState?.playerStats ?? {}, teamGroups: nextGroups, tournamentStates: { ...tournamentStates, [activeTournament]: { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion } } }))
     setActiveTab('overview')
   }
 
