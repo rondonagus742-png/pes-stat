@@ -310,9 +310,9 @@ export function LeagueDashboard() {
 
   return (
     <div className="min-h-screen bg-[#007a55] text-white">
-      <header className="border-b border-[#159a72] bg-[#005c40] text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-8">
-          <div className="flex items-center"><img src="/promuertos-logo.jpg" alt="Promuertos" className="h-10 w-auto max-w-[220px] object-contain object-left sm:h-12 sm:max-w-[280px]" /></div>
+      <header className="border-b border-[#159a72] bg-[#007a55] text-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-8">
+          <div className="flex items-center"><img src="/promuertos-logo.jpg" alt="Promuertos" className="h-24 w-auto max-w-[480px] object-contain object-left mix-blend-screen sm:h-28 sm:max-w-[620px]" /></div>
           <div className="flex items-center gap-2"><Button variant="outline" size="sm" className="border-white/40 bg-white text-[#007a55] hover:bg-emerald-50" onClick={() => { setMatchType('played'); setHomeGoals(''); setAwayGoals(''); setMatchDate(''); setMatchRound(''); setShowForm(true) }}><CirclePlus data-icon="inline-start" />Cargar resultado</Button></div>
         </div>
       </header>
