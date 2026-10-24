@@ -92,19 +92,11 @@ const tournamentData: Record<string, { players: Player[]; matches: Match[] }> = 
 }
 
 function countryFlag(name: string) {
-  const flags: Record<string, string> = {
-    argentina: 'ar', brasil: 'br', uruguay: 'uy', colombia: 'co', chile: 'cl', ecuador: 'ec',
-    mexico: 'mx', panama: 'pa', 'real madrid': 'es', barcelona: 'es', 'bayern munich': 'de',
-    liverpool: 'gb', psg: 'fr', inter: 'it', francia: 'fr', alemania: 'de', espana: 'es',
-    inglaterra: 'gb', peru: 'pe', paraguay: 'py', bolivia: 'bo', venezuela: 've', 'costa rica': 'cr',
-    'estados unidos': 'us', canada: 'ca', japon: 'jp', 'corea del sur': 'kr', portugal: 'pt',
-    'paises bajos': 'nl', holanda: 'nl', holland: 'nl', belgica: 'be', belgium: 'be', suiza: 'ch',
-    austria: 'at', serbia: 'rs', croacia: 'hr', dinamarca: 'dk', suecia: 'se',
-  }
+  const flags: Record<string, string> = { 'Argentina': '🇦🇷', 'Brasil': '🇧🇷', 'Uruguay': '🇺🇾', 'Colombia': '🇨🇴', 'Chile': '🇨🇱', 'Ecuador': '🇪🇨', 'México': '🇲🇽', 'Mexico': '🇲🇽', 'Panamá': '🇵🇦', 'Panama': '🇵🇦', 'Real Madrid': '🇪🇸', 'Barcelona': '🇪🇸', 'Bayern Munich': '🇩🇪', 'Liverpool': '🇬🇧', 'PSG': '🇫🇷', 'Inter': '🇮🇹', 'Francia': '🇫🇷', 'Alemania': '🇩🇪', 'España': '🇪🇸', 'Inglaterra': '🇬🇧', 'Perú': '🇵🇪', 'Paraguay': '🇵🇾', 'Bolivia': '🇧🇴', 'Venezuela': '🇻🇪', 'Costa Rica': '🇨🇷', 'Estados Unidos': '🇺🇸', 'Canadá': '🇨🇦', 'Japón': '🇯🇵', 'Corea del Sur': '🇰🇷', 'Portugal': '🇵🇹', 'Países Bajos': '🇳🇱', 'Bélgica': '🇧🇪', 'Suiza': '🇨🇭', 'Austria': '🇦🇹', 'Serbia': '🇷🇸', 'Croacia': '🇭🇷', 'Dinamarca': '🇩���', 'Suecia': '🇸🇪' }
   const cleanName = name.replace(/\s+\(.*\)$/, '').trim()
-  const normalizedName = cleanName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-  const code = flags[normalizedName] ?? ''
-  return <img src={code ? `https://flagcdn.com/w40/${code}.png` : '/placeholder.svg'} alt={`Bandera de ${cleanName}`} className="mr-2 inline-block size-6 rounded-full object-cover align-middle" />
+  const flag = flags[cleanName] ?? '🌐'
+  const code = [...flag].map((character) => String.fromCodePoint(character.codePointAt(0)! - 0x1f1e6 + 65)).join('').toLowerCase()
+  return <img src={code.length === 2 ? `https://flagcdn.com/w40/${code}.png` : '/placeholder.svg'} alt={`Bandera de ${cleanName}`} className="mr-2 inline-block size-6 rounded-full object-cover align-middle" />
 }
 
 function calculateTable(players: Player[], matches: Match[]) {
