@@ -164,7 +164,7 @@ export function LeagueDashboard() {
   const saveQueueRef = useRef(Promise.resolve())
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('pes6-league')
+    const saved = window.localStorage.getItem('pes6-league-v2')
     if (saved) {
       const parsed = JSON.parse(saved)
       const loadedMatches = Array.isArray(parsed.matches) ? parsed.matches : initialMatches
@@ -216,8 +216,8 @@ export function LeagueDashboard() {
   useEffect(() => {
     const currentTournamentState = { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion }
   const allTournamentStates = { ...tournamentStates, [activeTournament]: currentTournamentState }
-  const state = { activeTournament, players, matches, playerStats, teamGroups, tournamentStates: allTournamentStates, copaBracket, copaVisualBracket, copaChampion }
-    window.localStorage.setItem('pes6-league', JSON.stringify(state))
+  const state = { version: 2, activeTournament, players, matches, playerStats, teamGroups, tournamentStates: allTournamentStates, copaBracket, copaVisualBracket, copaChampion }
+    window.localStorage.setItem('pes6-league-v2', JSON.stringify(state))
     if (persistenceLoaded) {
       const payload = JSON.stringify(state)
       saveQueueRef.current = saveQueueRef.current
@@ -335,7 +335,7 @@ export function LeagueDashboard() {
     const nextGroups = savedState?.teamGroups ?? (['Copa América', 'Eurocopa'].includes(tournament) ? Object.fromEntries(nextPlayers.map((player, index) => [player.id, index < Math.ceil(nextPlayers.length / 2) ? 'A' : 'B'])) as Record<string, 'A' | 'B'> : {})
     setPlayerStats(savedState?.playerStats ?? {})
     setTeamGroups(nextGroups)
-    window.localStorage.setItem('pes6-league', JSON.stringify({ activeTournament: tournament, players: nextPlayers, matches: nextMatches, playerStats: savedState?.playerStats ?? {}, teamGroups: nextGroups, tournamentStates: { ...tournamentStates, [activeTournament]: { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion } } }))
+    window.localStorage.setItem('pes6-league-v2', JSON.stringify({ version: 2, activeTournament: tournament, players: nextPlayers, matches: nextMatches, playerStats: savedState?.playerStats ?? {}, teamGroups: nextGroups, tournamentStates: { ...tournamentStates, [activeTournament]: { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion } } }))
     setActiveTab('overview')
   }
 
