@@ -89,6 +89,21 @@ const tournamentData: Record<string, { players: Player[]; matches: Match[] }> = 
       { id: 43, home: 'chile', away: 'ecuador', homeGoals: 1, awayGoals: 2, date: '12 Jun, 20:30', round: 'Fecha 3' },
     ],
   },
+  'Copa Falopa': {
+    players: [
+      { id: 'falopa-racing', name: 'Racing Falopa', initials: 'RF', color: 'bg-sky-500' },
+      { id: 'falopa-boca', name: 'Boca Falopa', initials: 'BF', color: 'bg-yellow-500' },
+      { id: 'falopa-river', name: 'River Falopa', initials: 'RF', color: 'bg-rose-500' },
+      { id: 'falopa-independiente', name: 'Independiente Falopa', initials: 'IF', color: 'bg-red-500' },
+      { id: 'falopa-san-lorenzo', name: 'San Lorenzo Falopa', initials: 'SL', color: 'bg-indigo-500' },
+      { id: 'falopa-estudiantes', name: 'Estudiantes Falopa', initials: 'EF', color: 'bg-violet-500' },
+    ],
+    matches: [
+      { id: 51, home: 'falopa-racing', away: 'falopa-boca', homeGoals: 3, awayGoals: 2, date: 'Hoy, 22:00', round: 'Fecha 4', status: 'played' },
+      { id: 52, home: 'falopa-river', away: 'falopa-independiente', homeGoals: 1, awayGoals: 1, date: 'Ayer, 22:30', round: 'Fecha 4', status: 'played' },
+      { id: 53, home: 'falopa-san-lorenzo', away: 'falopa-estudiantes', homeGoals: 0, awayGoals: 0, date: '12 Jun, 20:30', round: 'Fecha 3', status: 'upcoming' },
+    ],
+  },
 }
 
 function countryFlag(name: string) {
@@ -328,7 +343,7 @@ export function LeagueDashboard() {
  <aside className="h-auto shrink-0 border-b border-[#159a72] bg-[#005c40] p-4 lg:self-stretch lg:w-72 lg:border-b-0 lg:border-r lg:p-5">
           <div className="flex items-center gap-2 px-3 pb-3 pt-2"><Globe2 className="size-4 text-emerald-200" /><span className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-100">Mis torneos</span></div>
           <nav aria-label="Navegación de torneos" className="flex gap-2 overflow-x-auto lg:flex-col">
-            {['Champions League', 'Mundial', 'Eurocopa', 'Copa América'].map((tournament) => <button type="button" key={tournament} onClick={() => selectTournament(tournament)} className={`flex min-w-max items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors lg:w-full ${activeTournament === tournament ? 'bg-[#007a55] text-white shadow-sm' : 'text-emerald-100 hover:bg-[#004a34] hover:text-white'}`}><Trophy className="size-4" />{tournament}</button>)}
+            {['Champions League', 'Mundial', 'Eurocopa', 'Copa América', 'Copa Falopa'].map((tournament) => <button type="button" key={tournament} onClick={() => selectTournament(tournament)} className={`flex min-w-max items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors lg:w-full ${activeTournament === tournament ? 'bg-[#007a55] text-white shadow-sm' : 'text-emerald-100 hover:bg-[#004a34] hover:text-white'}`}><Trophy className="size-4" />{tournament}</button>)}
           </nav>
           <div className="mt-3 hidden border-t border-[#159a72]/50 px-3 pt-3 text-xs leading-relaxed text-emerald-200 lg:block">Seleccioná un torneo para consultar sus partidos y posiciones.</div>
         </aside>
