@@ -104,7 +104,7 @@ function countryFlag(name: string) {
   const cleanName = name.replace(/\s+\(.*\)$/, '').trim()
   const normalizedName = cleanName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
   const code = codes[normalizedName]
-  return code ? <span className="mr-2 inline-flex size-6 items-center justify-center align-middle" title={`Bandera de ${cleanName}`}><img src={`https://flagcdn.com/24x18/${code}.png`} alt={`Bandera de ${cleanName}`} className="size-5 rounded-full object-cover" /></span> : null
+  return code ? <span className="mr-2 inline-flex size-6 items-center justify-center align-middle" title={`Bandera de ${cleanName}`}><img src={code === 'mx' || code === 'pa' ? `/flags/${code}.svg` : `https://flagcdn.com/24x18/${code}.png`} alt={`Bandera de ${cleanName}`} className="size-5 rounded-full object-cover" /></span> : null
 }
 
 function calculateTable(players: Player[], matches: Match[]) {
