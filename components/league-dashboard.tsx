@@ -89,14 +89,37 @@ const tournamentData: Record<string, { players: Player[]; matches: Match[] }> = 
       { id: 43, home: 'chile', away: 'ecuador', homeGoals: 1, awayGoals: 2, date: '12 Jun, 20:30', round: 'Fecha 3' },
     ],
   },
+  'Copa Falopa': {
+    players: [
+      { id: 'falopa-racing', name: 'Racing Falopa', initials: 'RF', color: 'bg-sky-500' },
+      { id: 'falopa-boca', name: 'Boca Falopa', initials: 'BF', color: 'bg-yellow-500' },
+      { id: 'falopa-river', name: 'River Falopa', initials: 'RF', color: 'bg-rose-500' },
+      { id: 'falopa-independiente', name: 'Independiente Falopa', initials: 'IF', color: 'bg-red-500' },
+      { id: 'falopa-san-lorenzo', name: 'San Lorenzo Falopa', initials: 'SL', color: 'bg-indigo-500' },
+      { id: 'falopa-estudiantes', name: 'Estudiantes Falopa', initials: 'EF', color: 'bg-violet-500' },
+    ],
+    matches: [
+      { id: 51, home: 'falopa-racing', away: 'falopa-boca', homeGoals: 3, awayGoals: 2, date: 'Hoy, 22:00', round: 'Fecha 4', status: 'played' },
+      { id: 52, home: 'falopa-river', away: 'falopa-independiente', homeGoals: 1, awayGoals: 1, date: 'Ayer, 22:30', round: 'Fecha 4', status: 'played' },
+      { id: 53, home: 'falopa-san-lorenzo', away: 'falopa-estudiantes', homeGoals: 0, awayGoals: 0, date: '12 Jun, 20:30', round: 'Fecha 3', status: 'upcoming' },
+    ],
+  },
 }
 
 function countryFlag(name: string) {
-  const flags: Record<string, string> = { 'Argentina': '🇦🇷', 'Brasil': '🇧🇷', 'Uruguay': '🇺🇾', 'Colombia': '🇨🇴', 'Chile': '🇨🇱', 'Ecuador': '🇪🇨', 'México': '🇲🇽', 'Mexico': '🇲🇽', 'Panamá': '🇵🇦', 'Panama': '🇵🇦', 'Real Madrid': '🇪🇸', 'Barcelona': '🇪🇸', 'Bayern Munich': '🇩🇪', 'Liverpool': '🇬🇧', 'PSG': '🇫🇷', 'Inter': '🇮🇹', 'Francia': '🇫🇷', 'Alemania': '🇩🇪', 'España': '🇪🇸', 'Inglaterra': '🇬🇧', 'Perú': '🇵🇪', 'Paraguay': '🇵🇾', 'Bolivia': '🇧🇴', 'Venezuela': '🇻🇪', 'Costa Rica': '🇨🇷', 'Estados Unidos': '🇺🇸', 'Canadá': '🇨🇦', 'Japón': '🇯🇵', 'Corea del Sur': '🇰🇷', 'Portugal': '🇵🇹', 'Países Bajos': '🇳🇱', 'Bélgica': '🇧🇪', 'Suiza': '🇨🇭', 'Austria': '🇦🇹', 'Serbia': '🇷🇸', 'Croacia': '🇭🇷', 'Dinamarca': '🇩🇰', 'Suecia': '🇸🇪' }
+  const codes: Record<string, string> = {
+    argentina: 'ar', brasil: 'br', uruguay: 'uy', colombia: 'co', chile: 'cl', ecuador: 'ec',
+    mexico: 'mx', panama: 'pa', 'real madrid': 'es', barcelona: 'es', 'bayern munich': 'de',
+    liverpool: 'gb', psg: 'fr', inter: 'it', francia: 'fr', alemania: 'de', espana: 'es', inglaterra: 'gb',
+    peru: 'pe', paraguay: 'py', bolivia: 'bo', venezuela: 've', 'costa rica': 'cr', 'estados unidos': 'us',
+    canada: 'ca', japon: 'jp', 'corea del sur': 'kr', portugal: 'pt', 'paises bajos': 'nl', holanda: 'nl',
+    holland: 'nl', belgica: 'be', belgium: 'be', suiza: 'ch', austria: 'at', serbia: 'rs', croacia: 'hr',
+    dinamarca: 'dk', suecia: 'se',
+  }
   const cleanName = name.replace(/\s+\(.*\)$/, '').trim()
-  const flag = flags[cleanName] ?? '🌐'
-  const code = [...flag].map((character) => String.fromCodePoint(character.codePointAt(0)! - 0x1f1e6 + 65)).join('').toLowerCase()
-  return <img src={code.length === 2 ? `https://flagcdn.com/w40/${code}.png` : '/placeholder.svg'} alt={`Bandera de ${cleanName}`} className="mr-2 inline-block size-6 rounded-full object-cover align-middle" />
+  const normalizedName = cleanName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const code = codes[normalizedName]
+  return code ? <span className="mr-2 inline-flex size-6 items-center justify-center align-middle" title={`Bandera de ${cleanName}`}><img src={code === 'mx' || code === 'pa' ? `/flags/${code}.svg?v=3` : `https://flagcdn.com/24x18/${code}.png`} alt={`Bandera de ${cleanName}`} className="size-5 rounded-full object-cover" /></span> : null
 }
 
 function calculateTable(players: Player[], matches: Match[]) {
@@ -141,7 +164,7 @@ export function LeagueDashboard() {
   const saveQueueRef = useRef(Promise.resolve())
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('pes6-league')
+    const saved = window.localStorage.getItem('pes6-league-v2')
     if (saved) {
       const parsed = JSON.parse(saved)
       const loadedMatches = Array.isArray(parsed.matches) ? parsed.matches : initialMatches
@@ -169,15 +192,23 @@ export function LeagueDashboard() {
     }).then((data) => {
       const state = data.state
       if (state && typeof state === 'object') {
-        if (typeof state.activeTournament === 'string' && tournamentData[state.activeTournament]) setActiveTournament(state.activeTournament)
-        if (Array.isArray(state.players)) setPlayers(state.players)
-        if (Array.isArray(state.matches)) setMatches(state.matches)
-        if (state.playerStats && typeof state.playerStats === 'object') setPlayerStats(state.playerStats)
-        if (state.teamGroups && typeof state.teamGroups === 'object') setTeamGroups(state.teamGroups)
-        if (state.tournamentStates && typeof state.tournamentStates === 'object') setTournamentStates(state.tournamentStates)
-        if (state.copaBracket && typeof state.copaBracket === 'object') setCopaBracket(state.copaBracket)
-        if (state.copaVisualBracket && typeof state.copaVisualBracket === 'object') setCopaVisualBracket(state.copaVisualBracket)
-        if (typeof state.copaChampion === 'string') setCopaChampion(state.copaChampion)
+        const loadedTournament = typeof state.activeTournament === 'string' && tournamentData[state.activeTournament] ? state.activeTournament : 'Champions League'
+        const loadedStates = state.tournamentStates && typeof state.tournamentStates === 'object' ? state.tournamentStates : {}
+        const candidateState = loadedStates[loadedTournament]
+        const loadedData = tournamentData[loadedTournament]
+        const defaultIds = new Set(loadedData.players.map((player) => player.id))
+        const hasCompatibleTeams = Array.isArray(candidateState?.players) && candidateState.players.some((player: Player) => defaultIds.has(player.id))
+        const loadedTournamentState = hasCompatibleTeams ? candidateState : undefined
+        const cleanedStates = hasCompatibleTeams ? loadedStates : { ...loadedStates, [loadedTournament]: undefined }
+        setActiveTournament(loadedTournament)
+        setTournamentStates(cleanedStates)
+        setPlayers(Array.isArray(loadedTournamentState?.players) ? loadedTournamentState.players : loadedData.players)
+        setMatches(Array.isArray(loadedTournamentState?.matches) ? loadedTournamentState.matches : loadedData.matches)
+        setPlayerStats(loadedTournamentState?.playerStats && typeof loadedTournamentState.playerStats === 'object' ? loadedTournamentState.playerStats : {})
+        setTeamGroups(loadedTournamentState?.teamGroups && typeof loadedTournamentState.teamGroups === 'object' ? loadedTournamentState.teamGroups : {})
+        if (loadedTournamentState?.copaBracket && typeof loadedTournamentState.copaBracket === 'object') setCopaBracket(loadedTournamentState.copaBracket)
+        if (loadedTournamentState?.copaVisualBracket && typeof loadedTournamentState.copaVisualBracket === 'object') setCopaVisualBracket(loadedTournamentState.copaVisualBracket)
+        if (typeof loadedTournamentState?.copaChampion === 'string') setCopaChampion(loadedTournamentState.copaChampion)
       }
       setPersistenceLoaded(true)
     }).catch(() => setPersistenceLoaded(true))
@@ -185,8 +216,8 @@ export function LeagueDashboard() {
   useEffect(() => {
     const currentTournamentState = { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion }
   const allTournamentStates = { ...tournamentStates, [activeTournament]: currentTournamentState }
-  const state = { activeTournament, players, matches, playerStats, teamGroups, tournamentStates: allTournamentStates, copaBracket, copaVisualBracket, copaChampion }
-    window.localStorage.setItem('pes6-league', JSON.stringify(state))
+  const state = { version: 2, activeTournament, players, matches, playerStats, teamGroups, tournamentStates: allTournamentStates, copaBracket, copaVisualBracket, copaChampion }
+    window.localStorage.setItem('pes6-league-v2', JSON.stringify(state))
     if (persistenceLoaded) {
       const payload = JSON.stringify(state)
       saveQueueRef.current = saveQueueRef.current
@@ -304,23 +335,23 @@ export function LeagueDashboard() {
     const nextGroups = savedState?.teamGroups ?? (['Copa América', 'Eurocopa'].includes(tournament) ? Object.fromEntries(nextPlayers.map((player, index) => [player.id, index < Math.ceil(nextPlayers.length / 2) ? 'A' : 'B'])) as Record<string, 'A' | 'B'> : {})
     setPlayerStats(savedState?.playerStats ?? {})
     setTeamGroups(nextGroups)
-    window.localStorage.setItem('pes6-league', JSON.stringify({ activeTournament: tournament, players: nextPlayers, matches: nextMatches, playerStats: {}, teamGroups: nextGroups }))
+    window.localStorage.setItem('pes6-league-v2', JSON.stringify({ version: 2, activeTournament: tournament, players: nextPlayers, matches: nextMatches, playerStats: savedState?.playerStats ?? {}, teamGroups: nextGroups, tournamentStates: { ...tournamentStates, [activeTournament]: { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion } } }))
     setActiveTab('overview')
   }
 
   return (
     <div className="min-h-screen bg-[#007a55] text-white">
-      <header className="border-b border-[#159a72] bg-[#005c40] text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-8">
-          <div className="flex items-center gap-3"><div className="grid size-10 place-items-center rounded-xl bg-white text-[#007a55]"><Trophy /></div><div><p className="text-lg font-black tracking-tight text-white">Liga Master</p><p className="text-xs font-medium text-emerald-100">PES 6 · Temporada 2026</p></div></div>
-          <div className="flex items-center gap-2"><span className="hidden rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white sm:inline-flex"><span className="mr-2 size-1.5 rounded-full bg-emerald-200" />Liga en curso</span><Button variant="outline" size="sm" className="border-white/40 bg-white text-[#007a55] hover:bg-emerald-50" onClick={() => { setMatchType('played'); setHomeGoals(''); setAwayGoals(''); setMatchDate(''); setMatchRound(''); setShowForm(true) }}><CirclePlus data-icon="inline-start" />Cargar resultado</Button></div>
+<header className="sticky top-0 z-30 border-b border-[#159a72] bg-[#005c40] text-white">
+  <div className="flex w-full items-center justify-between px-4 py-2 sm:px-5">
+          <div className="flex h-24 w-[480px] max-w-[55vw] items-center sm:h-28 sm:w-[620px] sm:max-w-[52vw]"><img src="/promuertos-logo.png?v=3" alt="Promuertos" className="h-auto w-full object-contain object-left" /></div>
+          <div className="flex items-center gap-2"><Button variant="outline" size="sm" className="border-white/40 bg-white text-[#007a55] hover:bg-emerald-50" onClick={() => { setMatchType('played'); setHomeGoals(''); setAwayGoals(''); setMatchDate(''); setMatchRound(''); setShowForm(true) }}><CirclePlus data-icon="inline-start" />Cargar resultado</Button></div>
         </div>
       </header>
-      <main data-active-tab={activeTab} className="flex min-h-[calc(100vh-81px)] w-full flex-col gap-0 px-0 py-0 lg:flex-row [&_table]:w-full [&_table]:bg-[#004a34] [&_thead]:bg-[#003d2b] [&_tbody_tr]:border-[#159a72]/50 [&_tbody_tr]:bg-[#004a34]">
-        <aside className="h-fit shrink-0 border-b border-[#159a72] bg-[#005c40] p-4 lg:sticky lg:top-0 lg:min-h-[calc(100vh-81px)] lg:w-72 lg:border-b-0 lg:border-r lg:p-5">
+<main data-active-tab={activeTab} className="flex min-h-[calc(100vh-81px)] w-full flex-col items-stretch gap-0 px-0 py-0 lg:flex-row [&_table]:w-full [&_table]:bg-[#004a34] [&_thead]:bg-[#003d2b] [&_tbody_tr]:border-[#159a72]/50 [&_tbody_tr]:bg-[#004a34]">
+ <aside className="h-auto shrink-0 border-b border-[#159a72] bg-[#005c40] p-4 lg:self-stretch lg:w-72 lg:border-b-0 lg:border-r lg:p-5">
           <div className="flex items-center gap-2 px-3 pb-3 pt-2"><Globe2 className="size-4 text-emerald-200" /><span className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-100">Mis torneos</span></div>
           <nav aria-label="Navegación de torneos" className="flex gap-2 overflow-x-auto lg:flex-col">
-            {['Champions League', 'Mundial', 'Eurocopa', 'Copa América'].map((tournament) => <button type="button" key={tournament} onClick={() => selectTournament(tournament)} className={`flex min-w-max items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors lg:w-full ${activeTournament === tournament ? 'bg-[#007a55] text-white shadow-sm' : 'text-emerald-100 hover:bg-[#004a34] hover:text-white'}`}><Trophy className="size-4" />{tournament}</button>)}
+            {['Champions League', 'Mundial', 'Eurocopa', 'Copa América', 'Copa Falopa'].map((tournament) => <button type="button" key={tournament} onClick={() => selectTournament(tournament)} className={`flex min-w-max items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors lg:w-full ${activeTournament === tournament ? 'bg-[#007a55] text-white shadow-sm' : 'text-emerald-100 hover:bg-[#004a34] hover:text-white'}`}><Trophy className="size-4" />{tournament}</button>)}
           </nav>
           <div className="mt-3 hidden border-t border-[#159a72]/50 px-3 pt-3 text-xs leading-relaxed text-emerald-200 lg:block">Seleccioná un torneo para consultar sus partidos y posiciones.</div>
         </aside>
@@ -331,7 +362,7 @@ export function LeagueDashboard() {
         {activeTab === 'players' && <TeamStatsPanel teams={players} selectedTeamId={selectedTeamId} onSelectTeam={setSelectedTeamId} stats={playerStats[selectedTeamId] ?? []} newPlayer={newPlayer} setNewPlayer={setNewPlayer} onAdd={addPlayerStat} onUpdate={updatePlayerStat} onRemove={removePlayerStat} tournament={activeTournament} teamGroups={teamGroups} newTeamName={newTeamName} setNewTeamName={setNewTeamName} newTeamGroup={newTeamGroup} setNewTeamGroup={setNewTeamGroup} onAddTeam={addTeam} onRemoveTeam={removeTeam} />}{activeTab === 'matches' && <section className="mt-6 rounded-2xl border border-[#159a72] bg-[#005c40]"><div className="border-b border-[#159a72]/50 px-5 py-4"><h2 className="font-bold">Todos los partidos</h2><p className="text-xs text-emerald-100">Historial completo de la competencia</p></div>{matches.filter((match) => match.status === 'played').map((match) => <div key={match.id} className="flex items-center justify-between border-b border-[#159a72]/50 px-5 py-4 last:border-0"><div className="flex items-center gap-3"><span className={`grid size-9 place-items-center rounded-full text-[10px] font-black text-white ${getPlayer(match.home).color}`}>{getPlayer(match.home).initials}</span><span className="text-sm font-semibold">{getPlayer(match.home).name}</span><strong className="rounded-lg bg-[#004a34] px-3 py-1.5">{match.homeGoals} - {match.awayGoals}</strong><span className="text-sm font-semibold">{getPlayer(match.away).name}</span><span className={`grid size-9 place-items-center rounded-full text-[10px] font-black text-white ${getPlayer(match.away).color}`}>{getPlayer(match.away).initials}</span></div><div className="flex items-center gap-3"><div className="hidden text-right text-xs text-emerald-200 sm:block"><span className="block">{match.date}</span><span className="block font-semibold">{match.round}</span></div><button type="button" onClick={() => removeMatch(match.id)} aria-label={`Eliminar resultado de ${getPlayer(match.home).name} y ${getPlayer(match.away).name}`} className="rounded-lg p-2 text-emerald-200 transition-colors hover:bg-red-500/15 hover:text-red-300"><Trash2 className="size-4" /></button></div></div>)}</section>}
         </div>
       </main>
-      <footer className="flex w-full items-center justify-between px-4 pb-7 text-xs text-emerald-200 sm:px-8 lg:px-10 xl:px-12"><span>Los datos se guardan solo en este navegador.</span><span className="flex items-center gap-1"><Settings2 className="size-3" /> Liga privada</span></footer>
+      <footer className="w-full px-4 pb-7 pt-5 text-center text-xs text-emerald-200 sm:px-8 lg:px-10 xl:px-12"><div className="border-t border-emerald-200/70 pt-3">La falopa te consume, basta de parsec</div></footer>
     </div>
   )
 }
@@ -355,7 +386,8 @@ function CopaAmericaBracket({ players, bracket, onChange }: { players: Player[];
 
 function CopaAmericaBracketVisual({ players, bracket, onChange, champion, onChampionChange }: { players: Player[]; bracket: CopaVisualBracket; onChange: React.Dispatch<React.SetStateAction<CopaVisualBracket>>; champion: string; onChampionChange: (value: string) => void }) {
   const update = (round: keyof CopaVisualBracket, index: number | null, field: keyof BracketMatch, value: string) => onChange((current) => { const source = current[round]; if (Array.isArray(source)) return { ...current, [round]: source.map((match, matchIndex) => matchIndex === index ? { ...match, [field]: value } : match) }; return { ...current, [round]: { ...source, [field]: value } } })
-  const matchCard = (round: keyof CopaVisualBracket, index: number | null, label: string) => { const source = bracket[round]; const match = Array.isArray(source) ? source[index ?? 0] : source; const homeGoals = Number(match.homeGoals); const awayGoals = Number(match.awayGoals); const homePenalties = Number(match.homePenalties); const awayPenalties = Number(match.awayPenalties); const winnerId = homeGoals > awayGoals || (homeGoals === awayGoals && homePenalties > awayPenalties) ? match.home : awayGoals > homeGoals || (awayGoals === homeGoals && awayPenalties > homePenalties) ? match.away : ''; return <div className="bracket-match rounded-lg bg-[#075d2d] p-2.5 shadow-sm"><div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-emerald-200">{label}</div><div className="grid grid-cols-[minmax(0,1fr)_34px] items-center gap-1"><select aria-label={`${label} equipo local`} value={match.home} onChange={(event) => update(round, index, 'home', event.target.value)} className={`min-w-0 bg-transparent text-sm text-white outline-none ${winnerId === match.home && match.home ? 'font-bold text-yellow-300' : 'font-semibold'}`}><option value="" className="bg-[#005c40]">Elegir equipo</option>{players.map((player) => <option key={player.id} value={player.id} className="bg-[#005c40]">{player.name}</option>)}</select><input aria-label={`${label} goles local`} type="number" min="0" value={match.homeGoals} onChange={(event) => update(round, index, 'homeGoals', event.target.value)} placeholder="-" className="w-full rounded bg-[#064522] px-1 py-1 text-center text-sm font-black text-amber-300 outline-none" /><select aria-label={`${label} equipo visitante`} value={match.away} onChange={(event) => update(round, index, 'away', event.target.value)} className={`min-w-0 bg-transparent text-sm text-emerald-100 outline-none ${winnerId === match.away && match.away ? 'font-bold text-yellow-300' : 'font-semibold'}`}><option value="" className="bg-[#005c40]">Elegir equipo</option>{players.map((player) => <option key={player.id} value={player.id} className="bg-[#005c40]">{player.name}</option>)}</select><input aria-label={`${label} goles visitante`} type="number" min="0" value={match.awayGoals} onChange={(event) => update(round, index, 'awayGoals', event.target.value)} placeholder="-" className="w-full rounded bg-[#064522] px-1 py-1 text-center text-sm font-black text-amber-300 outline-none" /></div><div className="mt-2 flex items-center justify-center gap-2 text-xs text-amber-200"><span>(</span><input aria-label={`${label} penales local`} type="number" min="0" value={match.homePenalties ?? ''} onChange={(event) => update(round, index, 'homePenalties', event.target.value)} placeholder="0" className="w-12 rounded bg-[#064522] px-1 py-1 text-center text-xs text-amber-200 outline-none" /><span>) - (</span><input aria-label={`${label} penales visitante`} type="number" min="0" value={match.awayPenalties ?? ''} onChange={(event) => update(round, index, 'awayPenalties', event.target.value)} placeholder="0" className="w-12 rounded bg-[#064522] px-1 py-1 text-center text-xs text-amber-200 outline-none" /><span>)</span></div></div> }
+  const selectedPlayer = (id: string) => players.find((player) => player.id === id)
+  const matchCard = (round: keyof CopaVisualBracket, index: number | null, label: string) => { const source = bracket[round]; const match = Array.isArray(source) ? source[index ?? 0] : source; const homeGoals = Number(match.homeGoals); const awayGoals = Number(match.awayGoals); const homePenalties = Number(match.homePenalties); const awayPenalties = Number(match.awayPenalties); const winnerId = homeGoals > awayGoals || (homeGoals === awayGoals && homePenalties > awayPenalties) ? match.home : awayGoals > homeGoals || (awayGoals === homeGoals && awayPenalties > homePenalties) ? match.away : ''; return <div className="bracket-match rounded-lg bg-[#075d2d] p-2.5 shadow-sm"><div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-emerald-200">{label}</div><div className="grid grid-cols-[minmax(0,1fr)_34px] items-center gap-1"><div className="flex min-w-0 items-center gap-1"><span className="shrink-0">{selectedPlayer(match.home) ? countryFlag(selectedPlayer(match.home)!.name) : null}</span><select aria-label={`${label} equipo local`} value={match.home} onChange={(event) => update(round, index, 'home', event.target.value)} className={`min-w-0 bg-transparent text-sm text-white outline-none ${winnerId === match.home && match.home ? 'font-bold text-yellow-300' : 'font-semibold'}`}><option value="" className="bg-[#005c40]">Elegir equipo</option>{players.map((player) => <option key={player.id} value={player.id} className="bg-[#005c40]">{player.name}</option>)}</select></div><input aria-label={`${label} goles local`} type="number" min="0" value={match.homeGoals} onChange={(event) => update(round, index, 'homeGoals', event.target.value)} placeholder="-" className="w-full rounded bg-[#064522] px-1 py-1 text-center text-sm font-black text-amber-300 outline-none" /><div className="flex min-w-0 items-center gap-1"><span className="shrink-0">{selectedPlayer(match.away) ? countryFlag(selectedPlayer(match.away)!.name) : null}</span><select aria-label={`${label} equipo visitante`} value={match.away} onChange={(event) => update(round, index, 'away', event.target.value)} className={`min-w-0 bg-transparent text-sm text-emerald-100 outline-none ${winnerId === match.away && match.away ? 'font-bold text-yellow-300' : 'font-semibold'}`}><option value="" className="bg-[#005c40]">Elegir equipo</option>{players.map((player) => <option key={player.id} value={player.id} className="bg-[#005c40]">{player.name}</option>)}</select></div><input aria-label={`${label} goles visitante`} type="number" min="0" value={match.awayGoals} onChange={(event) => update(round, index, 'awayGoals', event.target.value)} placeholder="-" className="w-full rounded bg-[#064522] px-1 py-1 text-center text-sm font-black text-amber-300 outline-none" /></div><div className="mt-2 flex items-center justify-center gap-2 text-xs text-amber-200"><span>(</span><input aria-label={`${label} penales local`} type="number" min="0" value={match.homePenalties ?? ''} onChange={(event) => update(round, index, 'homePenalties', event.target.value)} placeholder="0" className="w-12 rounded bg-[#064522] px-1 py-1 text-center text-xs text-amber-200 outline-none" /><span>) - (</span><input aria-label={`${label} penales visitante`} type="number" min="0" value={match.awayPenalties ?? ''} onChange={(event) => update(round, index, 'awayPenalties', event.target.value)} placeholder="0" className="w-12 rounded bg-[#064522] px-1 py-1 text-center text-xs text-amber-200 outline-none" /><span>)</span></div></div> }
   const column = (title: string, round: 'semifinals' | 'final', labels: string[]) => <div className={`flex min-w-[280px] flex-1 flex-col ${round === 'semifinals' ? 'justify-center gap-8' : 'justify-center'}`}><h3 className="mb-3 text-center text-lg font-black uppercase text-white">{title}</h3>{labels.map((label, index) => <div key={label}>{matchCard(round, round === 'final' ? null : index, label)}</div>)}</div>
   return <section className="mt-6 overflow-hidden rounded-2xl border border-[#103e2d] bg-[#06291e] p-4 sm:p-6"><div className="mb-5"><h2 className="text-xl font-black text-white">Cuadro de eliminación</h2><p className="text-xs text-emerald-200">Semifinales y final. Si hay empate, puedes registrar los penales.</p></div><div className="bracket-scroll overflow-x-auto pb-4"><div className="mx-auto flex max-w-[900px] min-w-[620px] items-stretch justify-center gap-8">{column('Semifinales', 'semifinals', ['Semifinal 1', 'Semifinal 2'])}{column('Final', 'final', ['Final'])}<div className="flex min-w-[220px] flex-1 flex-col justify-center"><h3 className="mb-3 text-center text-lg font-black uppercase text-white">Campeón</h3><div className="rounded-lg border border-amber-400/50 bg-[#075d2d] p-4"><label className="text-xs font-bold uppercase tracking-wide text-amber-300">Elegir campeón<select aria-label="Elegir campeón Copa América" value={champion} onChange={(event) => onChampionChange(event.target.value)} className="mt-2 w-full rounded-lg border border-[#159a72] bg-[#005c40] p-2 text-sm font-bold text-white"><option value="">Elegir equipo</option>{players.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select></label></div></div></div></div></section>
 }
