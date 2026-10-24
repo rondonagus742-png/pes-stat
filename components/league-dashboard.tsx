@@ -316,8 +316,8 @@ export function LeagueDashboard() {
           <div className="flex items-center gap-2"><Button variant="outline" size="sm" className="border-white/40 bg-white text-[#007a55] hover:bg-emerald-50" onClick={() => { setMatchType('played'); setHomeGoals(''); setAwayGoals(''); setMatchDate(''); setMatchRound(''); setShowForm(true) }}><CirclePlus data-icon="inline-start" />Cargar resultado</Button></div>
         </div>
       </header>
-      <main data-active-tab={activeTab} className="flex min-h-[calc(100vh-81px)] w-full flex-col gap-0 px-0 py-0 lg:flex-row [&_table]:w-full [&_table]:bg-[#004a34] [&_thead]:bg-[#003d2b] [&_tbody_tr]:border-[#159a72]/50 [&_tbody_tr]:bg-[#004a34]">
-        <aside className="h-fit shrink-0 border-b border-[#159a72] bg-[#005c40] p-4 lg:min-h-[calc(100vh-81px)] lg:w-72 lg:border-b-0 lg:border-r lg:p-5">
+<main data-active-tab={activeTab} className="flex min-h-[calc(100vh-81px)] w-full flex-col items-stretch gap-0 px-0 py-0 lg:flex-row [&_table]:w-full [&_table]:bg-[#004a34] [&_thead]:bg-[#003d2b] [&_tbody_tr]:border-[#159a72]/50 [&_tbody_tr]:bg-[#004a34]">
+ <aside className="h-auto shrink-0 border-b border-[#159a72] bg-[#005c40] p-4 lg:self-stretch lg:w-72 lg:border-b-0 lg:border-r lg:p-5">
           <div className="flex items-center gap-2 px-3 pb-3 pt-2"><Globe2 className="size-4 text-emerald-200" /><span className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-100">Mis torneos</span></div>
           <nav aria-label="Navegación de torneos" className="flex gap-2 overflow-x-auto lg:flex-col">
             {['Champions League', 'Mundial', 'Eurocopa', 'Copa América'].map((tournament) => <button type="button" key={tournament} onClick={() => selectTournament(tournament)} className={`flex min-w-max items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors lg:w-full ${activeTournament === tournament ? 'bg-[#007a55] text-white shadow-sm' : 'text-emerald-100 hover:bg-[#004a34] hover:text-white'}`}><Trophy className="size-4" />{tournament}</button>)}
