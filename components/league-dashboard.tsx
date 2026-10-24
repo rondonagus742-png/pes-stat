@@ -312,7 +312,7 @@ export function LeagueDashboard() {
     <div className="min-h-screen bg-[#007a55] text-white">
       <header className="border-b border-[#159a72] bg-[#007a55] text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-8">
-          <div className="flex items-center"><img src="/promuertos-logo.png" alt="Promuertos" className="h-24 w-auto max-w-[480px] object-contain object-left mix-blend-screen brightness-125 contrast-125 sm:h-28 sm:max-w-[620px]" /></div>
+          <div className="relative flex h-24 w-[480px] max-w-[55vw] items-center sm:h-28 sm:w-[620px] sm:max-w-[52vw]"><img src="/promuertos-logo.png" alt="Promuertos" className="absolute inset-0 h-full w-full object-contain object-left brightness-0 invert" /><img src="/promuertos-logo.png" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-contain object-left [clip-path:ellipse(13%_58%_at_28%_50%)]" /></div>
           <div className="flex items-center gap-2"><Button variant="outline" size="sm" className="border-white/40 bg-white text-[#007a55] hover:bg-emerald-50" onClick={() => { setMatchType('played'); setHomeGoals(''); setAwayGoals(''); setMatchDate(''); setMatchRound(''); setShowForm(true) }}><CirclePlus data-icon="inline-start" />Cargar resultado</Button></div>
         </div>
       </header>
