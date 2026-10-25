@@ -164,28 +164,11 @@ export function LeagueDashboard() {
   const saveQueueRef = useRef(Promise.resolve())
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('pes6-league-v3')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      const loadedMatches = Array.isArray(parsed.matches) ? parsed.matches : initialMatches
-      const normalizedMatches = loadedMatches.map((match: Match) => ({
-        ...match,
-        // Migrate old upcoming entries that were saved before status existed.
-        status: match.status === 'played' && match.homeGoals === 0 && match.awayGoals === 0 ? 'upcoming' : (match.status ?? (match.homeGoals === 0 && match.awayGoals === 0 ? 'upcoming' : 'played')),
-      }))
-      const uniqueMatches = normalizedMatches.filter((match: Match, index: number, all: Match[]) => all.findIndex((candidate) => `${candidate.home}|${candidate.away}|${candidate.date}|${candidate.round}|${candidate.status}|${candidate.homeGoals}|${candidate.awayGoals}` === `${match.home}|${match.away}|${match.date}|${match.round}|${match.status}|${match.homeGoals}|${match.awayGoals}`) === index)
-      const hasSavedTournament = typeof parsed.activeTournament === 'string' && tournamentData[parsed.activeTournament]
-      const savedTournament = hasSavedTournament ? parsed.activeTournament : 'Champions League'
-      const savedData = tournamentData[savedTournament]
-      setActiveTournament(savedTournament)
-      setPlayers(hasSavedTournament && Array.isArray(parsed.players) ? parsed.players : savedData.players)
-      setMatches(hasSavedTournament ? uniqueMatches : savedData.matches)
-      setPlayerStats(hasSavedTournament && parsed.playerStats && typeof parsed.playerStats === 'object' ? parsed.playerStats : {})
-      setTeamGroups(hasSavedTournament && parsed.teamGroups && typeof parsed.teamGroups === 'object' ? parsed.teamGroups : {})
-      if (hasSavedTournament && parsed.copaBracket && typeof parsed.copaBracket === 'object') setCopaBracket(parsed.copaBracket)
-      if (hasSavedTournament && parsed.copaVisualBracket && typeof parsed.copaVisualBracket === 'object') setCopaVisualBracket(parsed.copaVisualBracket)
-      if (hasSavedTournament && typeof parsed.copaChampion === 'string') setCopaChampion(parsed.copaChampion)
-    }
+    // Start from the current code-defined tournament data. Legacy browser state
+    // is intentionally not hydrated because it can contain obsolete teams and matches.
+    window.localStorage.removeItem('pes6-league')
+    window.localStorage.removeItem('pes6-league-v2')
+    window.localStorage.removeItem('pes6-league-v3')
     setPersistenceLoaded(true)
   }, [])
   useEffect(() => {
@@ -318,7 +301,7 @@ export function LeagueDashboard() {
     <div className="min-h-screen bg-[#007a55] text-white">
 <header className="sticky top-0 z-30 border-b border-[#159a72] bg-[#005c40] text-white">
   <div className="flex w-full items-center justify-between px-4 py-2 sm:px-5">
-          <div className="flex h-24 w-[480px] max-w-[55vw] items-center sm:h-28 sm:w-[620px] sm:max-w-[52vw]"><img src="/promuertos-logo.png?v=5" alt="Promuertos" className="h-auto w-full object-contain object-left" /></div>
+          <div className="flex h-24 w-[480px] max-w-[55vw] items-center sm:h-28 sm:w-[620px] sm:max-w-[52vw]"><img src="/promuertos-logo.png?v=6" alt="Promuertos" className="h-auto w-full object-contain object-left" /></div>
           <div className="flex items-center gap-2"><Button variant="outline" size="sm" className="border-white/40 bg-white text-[#007a55] hover:bg-emerald-50" onClick={() => { setMatchType('played'); setHomeGoals(''); setAwayGoals(''); setMatchDate(''); setMatchRound(''); setShowForm(true) }}><CirclePlus data-icon="inline-start" />Cargar resultado</Button></div>
         </div>
       </header>
