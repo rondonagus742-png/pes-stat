@@ -164,7 +164,7 @@ export function LeagueDashboard() {
   const saveQueueRef = useRef(Promise.resolve())
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('pes6-league-v2')
+    const saved = window.localStorage.getItem('pes6-league-v3')
     if (saved) {
       const parsed = JSON.parse(saved)
       const loadedMatches = Array.isArray(parsed.matches) ? parsed.matches : initialMatches
@@ -186,38 +186,13 @@ export function LeagueDashboard() {
       if (hasSavedTournament && parsed.copaVisualBracket && typeof parsed.copaVisualBracket === 'object') setCopaVisualBracket(parsed.copaVisualBracket)
       if (hasSavedTournament && typeof parsed.copaChampion === 'string') setCopaChampion(parsed.copaChampion)
     }
-    fetch('/api/league-state').then(async (response) => {
-      if (!response.ok) throw new Error(`Persistence read failed: ${response.status}`)
-      return response.json()
-    }).then((data) => {
-      const state = data.state
-      if (state && typeof state === 'object') {
-        const loadedTournament = typeof state.activeTournament === 'string' && tournamentData[state.activeTournament] ? state.activeTournament : 'Champions League'
-        const loadedStates = state.tournamentStates && typeof state.tournamentStates === 'object' ? state.tournamentStates : {}
-        const candidateState = loadedStates[loadedTournament]
-        const loadedData = tournamentData[loadedTournament]
-        const defaultIds = new Set(loadedData.players.map((player) => player.id))
-        const hasCompatibleTeams = Array.isArray(candidateState?.players) && candidateState.players.some((player: Player) => defaultIds.has(player.id))
-        const loadedTournamentState = hasCompatibleTeams ? candidateState : undefined
-        const cleanedStates = hasCompatibleTeams ? loadedStates : { ...loadedStates, [loadedTournament]: undefined }
-        setActiveTournament(loadedTournament)
-        setTournamentStates(cleanedStates)
-        setPlayers(Array.isArray(loadedTournamentState?.players) ? loadedTournamentState.players : loadedData.players)
-        setMatches(Array.isArray(loadedTournamentState?.matches) ? loadedTournamentState.matches : loadedData.matches)
-        setPlayerStats(loadedTournamentState?.playerStats && typeof loadedTournamentState.playerStats === 'object' ? loadedTournamentState.playerStats : {})
-        setTeamGroups(loadedTournamentState?.teamGroups && typeof loadedTournamentState.teamGroups === 'object' ? loadedTournamentState.teamGroups : {})
-        if (loadedTournamentState?.copaBracket && typeof loadedTournamentState.copaBracket === 'object') setCopaBracket(loadedTournamentState.copaBracket)
-        if (loadedTournamentState?.copaVisualBracket && typeof loadedTournamentState.copaVisualBracket === 'object') setCopaVisualBracket(loadedTournamentState.copaVisualBracket)
-        if (typeof loadedTournamentState?.copaChampion === 'string') setCopaChampion(loadedTournamentState.copaChampion)
-      }
-      setPersistenceLoaded(true)
-    }).catch(() => setPersistenceLoaded(true))
+    setPersistenceLoaded(true)
   }, [])
   useEffect(() => {
     const currentTournamentState = { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion }
   const allTournamentStates = { ...tournamentStates, [activeTournament]: currentTournamentState }
   const state = { version: 2, activeTournament, players, matches, playerStats, teamGroups, tournamentStates: allTournamentStates, copaBracket, copaVisualBracket, copaChampion }
-    window.localStorage.setItem('pes6-league-v2', JSON.stringify(state))
+    window.localStorage.setItem('pes6-league-v3', JSON.stringify(state))
     if (persistenceLoaded) {
       const payload = JSON.stringify(state)
       saveQueueRef.current = saveQueueRef.current
@@ -335,7 +310,7 @@ export function LeagueDashboard() {
     const nextGroups = savedState?.teamGroups ?? (['Copa América', 'Eurocopa'].includes(tournament) ? Object.fromEntries(nextPlayers.map((player, index) => [player.id, index < Math.ceil(nextPlayers.length / 2) ? 'A' : 'B'])) as Record<string, 'A' | 'B'> : {})
     setPlayerStats(savedState?.playerStats ?? {})
     setTeamGroups(nextGroups)
-    window.localStorage.setItem('pes6-league-v2', JSON.stringify({ version: 2, activeTournament: tournament, players: nextPlayers, matches: nextMatches, playerStats: savedState?.playerStats ?? {}, teamGroups: nextGroups, tournamentStates: { ...tournamentStates, [activeTournament]: { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion } } }))
+    window.localStorage.setItem('pes6-league-v3', JSON.stringify({ version: 2, activeTournament: tournament, players: nextPlayers, matches: nextMatches, playerStats: savedState?.playerStats ?? {}, teamGroups: nextGroups, tournamentStates: { ...tournamentStates, [activeTournament]: { players, matches, playerStats, teamGroups, copaBracket, copaVisualBracket, copaChampion } } }))
     setActiveTab('overview')
   }
 
@@ -343,7 +318,7 @@ export function LeagueDashboard() {
     <div className="min-h-screen bg-[#007a55] text-white">
 <header className="sticky top-0 z-30 border-b border-[#159a72] bg-[#005c40] text-white">
   <div className="flex w-full items-center justify-between px-4 py-2 sm:px-5">
-          <div className="flex h-24 w-[480px] max-w-[55vw] items-center sm:h-28 sm:w-[620px] sm:max-w-[52vw]"><img src="/promuertos-logo.jpg?v=4" alt="Promuertos" className="h-auto w-full object-contain object-left" /></div>
+          <div className="flex h-24 w-[480px] max-w-[55vw] items-center sm:h-28 sm:w-[620px] sm:max-w-[52vw]"><img src="/promuertos-logo.png?v=5" alt="Promuertos" className="h-auto w-full object-contain object-left" /></div>
           <div className="flex items-center gap-2"><Button variant="outline" size="sm" className="border-white/40 bg-white text-[#007a55] hover:bg-emerald-50" onClick={() => { setMatchType('played'); setHomeGoals(''); setAwayGoals(''); setMatchDate(''); setMatchRound(''); setShowForm(true) }}><CirclePlus data-icon="inline-start" />Cargar resultado</Button></div>
         </div>
       </header>
